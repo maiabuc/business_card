@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useEffect, useRef, useCallback, useMemo } from "react";
-import type { FunctionComponent } from "react";
+import type { FunctionComponent, CSSProperties } from "react";
 
 import "./ProfileCard.css";
 
@@ -19,19 +19,25 @@ const ANIMATION_CONFIG = {
   INITIAL_Y_OFFSET: 60,
 };
 
-const clamp = (value, min = 0, max = 100) =>
+const clamp = (value: number, min = 0, max = 100): number =>
   Math.min(Math.max(value, min), max);
 
-const round = (value, precision = 3) =>
+const round = (value: number, precision = 3): number =>
   Number.parseFloat(value.toFixed(precision));
 
-const adjust = (value, fromMin, fromMax, toMin, toMax) =>
+const adjust = (
+  value: number,
+  fromMin: number,
+  fromMax: number,
+  toMin: number,
+  toMax: number
+): number =>
   round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
 
-const easeInOutCubic = (x) =>
+const easeInOutCubic = (x: number): number =>
   x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 
-const ProfileCardComponent: FunctionComponent<{
+interface ProfileCardProps {
   avatarUrl?: string;
   iconUrl?: string;
   grainUrl?: string;
@@ -53,7 +59,9 @@ const ProfileCardComponent: FunctionComponent<{
   onProjectsClick?: () => void;
   projectsUrl?: string;
   LinkedinUrl?: string;
-}> = ({
+}
+
+const ProfileCardComponent: FunctionComponent<ProfileCardProps> = ({
   avatarUrl = "<Placeholder for avatar URL>",
   iconUrl = "<Placeholder for icon URL>",
   grainUrl = "<Placeholder for grain URL>",
@@ -76,15 +84,20 @@ const ProfileCardComponent: FunctionComponent<{
   projectsUrl,
   LinkedinUrl,
 }) => {
-  const wrapRef = useRef(null);
-  const cardRef = useRef(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLElement>(null);
 
   const animationHandlers = useMemo(() => {
     if (!enableTilt) return null;
 
-    let rafId = null;
+    let rafId: number | null = null;
 
-    const updateCardTransform = (offsetX, offsetY, card, wrap) => {
+    const updateCardTransform = (
+      offsetX: number,
+      offsetY: number,
+      card: HTMLElement,
+      wrap: HTMLDivElement
+    ) => {
       const width = card.clientWidth;
       const height = card.clientHeight;
 
@@ -115,12 +128,18 @@ const ProfileCardComponent: FunctionComponent<{
       });
     };
 
-    const createSmoothAnimation = (duration, startX, startY, card, wrap) => {
+    const createSmoothAnimation = (
+      duration: number,
+      startX: number,
+      startY: number,
+      card: HTMLElement,
+      wrap: HTMLDivElement
+    ) => {
       const startTime = performance.now();
       const targetX = wrap.clientWidth / 2;
       const targetY = wrap.clientHeight / 2;
 
-      const animationLoop = (currentTime) => {
+      const animationLoop = (currentTime: number) => {
         const elapsed = currentTime - startTime;
         const progress = clamp(elapsed / duration);
         const easedProgress = easeInOutCubic(progress);
@@ -151,7 +170,7 @@ const ProfileCardComponent: FunctionComponent<{
   }, [enableTilt]);
 
   const handlePointerMove = useCallback(
-    (event) => {
+    (event: PointerEvent) => {
       const card = cardRef.current;
       const wrap = wrapRef.current;
 
@@ -180,7 +199,7 @@ const ProfileCardComponent: FunctionComponent<{
   }, [animationHandlers]);
 
   const handlePointerLeave = useCallback(
-    (event) => {
+    (event: PointerEvent) => {
       const card = cardRef.current;
       const wrap = wrapRef.current;
 
@@ -242,14 +261,15 @@ const ProfileCardComponent: FunctionComponent<{
   ]);
 
   const cardStyle = useMemo(
-    () => ({
-      "--icon": iconUrl ? `url(${iconUrl})` : "none",
-      "--grain": grainUrl ? `url(${grainUrl})` : "none",
-      "--behind-gradient": showBehindGradient
-        ? behindGradient ?? DEFAULT_BEHIND_GRADIENT
-        : "none",
-      "--inner-gradient": innerGradient ?? DEFAULT_INNER_GRADIENT,
-    }),
+    (): CSSProperties & Record<string, string> =>
+      ({
+        "--icon": iconUrl ? `url(${iconUrl})` : "none",
+        "--grain": grainUrl ? `url(${grainUrl})` : "none",
+        "--behind-gradient": showBehindGradient
+          ? behindGradient ?? DEFAULT_BEHIND_GRADIENT
+          : "none",
+        "--inner-gradient": innerGradient ?? DEFAULT_INNER_GRADIENT,
+      } as CSSProperties & Record<string, string>),
     [iconUrl, grainUrl, showBehindGradient, behindGradient, innerGradient]
   );
 
@@ -257,7 +277,7 @@ const ProfileCardComponent: FunctionComponent<{
     if (LinkedinUrl) {
       window.open(LinkedinUrl, "_blank", "noopener,noreferrer");
     }
-    onProjectsClick?.();
+    onContactClick?.();
   }, [onContactClick, LinkedinUrl]);
 
   const handleProjectsClick = useCallback(() => {
@@ -284,7 +304,7 @@ const ProfileCardComponent: FunctionComponent<{
               alt={`${name || "User"} avatar`}
               loading="lazy"
               onError={(e) => {
-                const target = e.target;
+                const target = e.target as HTMLImageElement;
                 target.style.display = "none";
               }}
             />
@@ -295,11 +315,11 @@ const ProfileCardComponent: FunctionComponent<{
                   <div className="pc-user-details">
                     <div className="pc-mini-avatar">
                       <img
-                        src={avatarUrl}
+                        src={avatarUrl || "/placeholder.svg"}
                         alt={`${name || "User"} mini avatar`}
                         loading="lazy"
                         onError={(e) => {
-                          const target = e.target;
+                          const target = e.target as HTMLImageElement;
                           target.style.opacity = "0.5";
                           target.src = avatarUrl;
                         }}
@@ -331,7 +351,7 @@ const ProfileCardComponent: FunctionComponent<{
                           alt={`${name || "User"} mini avatar`}
                           loading="lazy"
                           onError={(e) => {
-                            const target = e.target;
+                            const target = e.target as HTMLImageElement;
                             target.style.opacity = "0.5";
                             target.src = avatarUrl;
                           }}
