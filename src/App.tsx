@@ -24,7 +24,7 @@ function App() {
           status="Linkedin"
           projectsText="My Web Page"
           contactText="Contact Me"
-          avatarUrl="./../public/blacknwhite_image.png"
+          avatarUrl="blacknwhite_image.png"
           miniAvatarUrl="favicon.ico"
           showUserInfo={true}
           enableTilt={false}
