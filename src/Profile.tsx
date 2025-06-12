@@ -1,6 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback, useMemo } from "react";
+import React from "react";
+import { useEffect, useRef, useCallback, useMemo } from "react";
+import type { FunctionComponent } from "react";
+
 import "./ProfileCard.css";
 
 const DEFAULT_BEHIND_GRADIENT =
